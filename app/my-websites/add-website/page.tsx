@@ -31,10 +31,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { mainCategories } from "@/constants/categories";
 import { flagComponentsMap, languages } from "@/constants/languages";
 import { countries } from "@/constants/countries";
 import { Textarea } from "@/components/ui/textarea";
+import { mainCategories } from "@/constants/categories";
 
 const formSchema = z.object({
   websiteUrl: z
@@ -48,9 +48,12 @@ const formSchema = z.object({
     required_error: "Please select an option",
   }),
   mainCategories: z.array(z.string()).optional(),
-  description: z.string().min(350, {
-    message: "Minimum 350 Characters",
-  }),
+  description: z
+    .string({ required_error: "Description is required" })
+    .min(350, {
+      message: "Minimum 350 Characters",
+    }),
+  isOwner: z.boolean().optional(),
 });
 
 export default function AddWebsite() {
@@ -61,6 +64,7 @@ export default function AddWebsite() {
       primaryLanguage: "en-GB",
       majorityTraffic: "en-US",
       mainCategories: [],
+      isOwner: false,
     },
   });
 
@@ -202,7 +206,7 @@ export default function AddWebsite() {
                   />
                 </div>
 
-                {/* <FormField
+                <FormField
                   control={form.control}
                   name="mainCategories"
                   render={() => (
@@ -212,7 +216,7 @@ export default function AddWebsite() {
                         <FormField
                           key={category.value}
                           control={form.control}
-                          name="items"
+                          name="mainCategories"
                           render={({ field }) => {
                             return (
                               <FormItem
@@ -221,6 +225,7 @@ export default function AddWebsite() {
                               >
                                 <FormControl>
                                   <Checkbox
+                                  className="size-6"
                                     checked={field.value?.includes(
                                       category.value
                                     )}
@@ -239,7 +244,7 @@ export default function AddWebsite() {
                                     }}
                                   />
                                 </FormControl>
-                                <FormLabel className="text-sm font-normal">
+                                <FormLabel className="text-sm font-medium text-foreground/60">
                                   {category.label}
                                 </FormLabel>
                               </FormItem>
@@ -250,7 +255,7 @@ export default function AddWebsite() {
                       <FormMessage />
                     </FormItem>
                   )}
-                /> */}
+                />
                 <FormField
                   control={form.control}
                   name="description"
@@ -264,6 +269,22 @@ export default function AddWebsite() {
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="isOwner"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel>I am the owner of the website</FormLabel>
                       <FormMessage />
                     </FormItem>
                   )}
