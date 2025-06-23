@@ -1,0 +1,17 @@
+export const mainCategories = [
+  { label: "E-commerce", value: "ecommerce" },
+  { label: "Technology", value: "technology" },
+  { label: "Education", value: "education" },
+  { label: "Health & Wellness", value: "health" },
+  { label: "Finance", value: "finance" },
+  { label: "Entertainment", value: "entertainment" },
+  { label: "News & Media", value: "news" },
+  { label: "Travel", value: "travel" },
+  { label: "Food & Beverage", value: "food" },
+  { label: "Real Estate", value: "realestate" },
+  { label: "Arts & Culture", value: "arts" },
+  { label: "Sports", value: "sports" },
+  { label: "Gaming", value: "gaming" },
+  { label: "Automotive", value: "automotive" },
+  { label: "Fashion", value: "fashion" },
+];

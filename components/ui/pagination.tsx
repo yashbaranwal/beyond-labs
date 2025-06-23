@@ -1,7 +1,7 @@
 import * as React from "react"
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ArrowLeft,
+  ArrowRight,
   MoreHorizontalIcon,
 } from "lucide-react"
 
@@ -27,7 +27,7 @@ function PaginationContent({
   return (
     <ul
       data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
+      className={cn("flex flex-row items-center gap-1 border rounded-md shadow-xs", className)}
       {...props}
     />
   )
@@ -45,7 +45,7 @@ type PaginationLinkProps = {
 function PaginationLink({
   className,
   isActive,
-  size = "icon",
+  size = "number",
   ...props
 }: PaginationLinkProps) {
   return (
@@ -55,9 +55,10 @@ function PaginationLink({
       data-active={isActive}
       className={cn(
         buttonVariants({
-          variant: isActive ? "outline" : "ghost",
+          variant: isActive ? "pagination" : "ghost",
           size,
         }),
+        "text-sm font-medium text-foreground",
         className
       )}
       {...props}
@@ -76,8 +77,8 @@ function PaginationPrevious({
       className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
       {...props}
     >
-      <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
+      <ArrowLeft className="size-5 text-muted/60" />
+      <span className="hidden sm:block ml-1 text-sm font-medium text-foreground">Previous</span>
     </PaginationLink>
   )
 }
@@ -93,8 +94,8 @@ function PaginationNext({
       className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
       {...props}
     >
-      <span className="hidden sm:block">Next</span>
-      <ChevronRightIcon />
+      <span className="hidden sm:block mr-1 text-sm font-medium text-foreground">Next</span>
+      <ArrowRight className="size-5 text-muted/60" />
     </PaginationLink>
   )
 }
