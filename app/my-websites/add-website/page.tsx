@@ -212,50 +212,51 @@ export default function AddWebsite() {
                   render={() => (
                     <FormItem>
                       <FormLabel className="mb-2">Main Category</FormLabel>
-                      {mainCategories.map((category) => (
-                        <FormField
-                          key={category.value}
-                          control={form.control}
-                          name="mainCategories"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={category.value}
-                                className="flex flex-row items-center gap-2"
-                              >
-                                <FormControl>
-                                  <Checkbox
-                                  className="size-6"
-                                    checked={field.value?.includes(
-                                      category.value
-                                    )}
-                                    onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([
-                                            ...field.value,
-                                            category.value,
-                                          ])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) =>
-                                                value !== category.value
-                                            )
-                                          );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-sm font-medium text-foreground/60">
-                                  {category.label}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      ))}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-4 gap-x-6">
+                        {mainCategories.map((category) => (
+                          <FormField
+                            key={category.value}
+                            control={form.control}
+                            name="mainCategories"
+                            render={({ field }) => {
+                              return (
+                                <FormItem className="flex flex-row items-center space-x-2">
+                                  <FormControl>
+                                    <Checkbox
+                                      className="size-5"
+                                      checked={field.value?.includes(
+                                        category.value
+                                      )}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([
+                                              ...(field.value || []),
+                                              category.value,
+                                            ])
+                                          : field.onChange(
+                                              (field.value || []).filter(
+                                                (value) =>
+                                                  value !== category.value
+                                              )
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal text-foreground/80 cursor-pointer">
+                                    {category.label}
+                                  </FormLabel>
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="description"
