@@ -41,6 +41,7 @@ import { useFormStore } from "@/stores/add-website-form-store";
 import { flagComponentsMap, languages } from "@/constants/languages";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   acceptPreconditions: z.boolean(),
@@ -99,7 +100,9 @@ const formSchema = z.object({
 });
 
 export default function AddWebsite() {
+  const router = useRouter()
   const [openItem, setOpenItem] = useState<string|undefined>("item-1")
+  const {addFormData} = useFormStore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -139,7 +142,8 @@ export default function AddWebsite() {
   const onSubmit = (data: z.infer<typeof formSchema>) => {
 
     console.log(data);
-    useFormStore.getState().addFormData(data);
+    addFormData(data);
+    router.push("/my-websites")
   };
 
   const handleAccept = () => {

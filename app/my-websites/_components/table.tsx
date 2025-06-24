@@ -1,6 +1,8 @@
 "use client"
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import {
     Table,
     TableBody,
@@ -18,91 +20,9 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination";
-import { useFormStore } from "@/stores/add-website-form-store";
+  import { WebsiteFormData } from "@/types/website-form";
+  import { useFormStore } from "@/stores/add-website-form-store";
       
-  const data = [
-    {
-      id: "1",
-      website: "example.com",
-      country: { name: "United States", code: "US" },
-      language: "United States", // Assuming this refers to locale/region for language
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "2",
-      website: "example.com",
-      country: { name: "Germany", code: "DE" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "3",
-      website: "example.com",
-      country: { name: "United States", code: "US" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "4",
-      website: "example.com",
-      country: { name: "Germany", code: "DE" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "5",
-      website: "example.com",
-      country: { name: "United States", code: "US" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "6",
-      website: "example.com",
-      country: { name: "Germany", code: "DE" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "7",
-      website: "example.com",
-      country: { name: "United States", code: "US" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "8",
-      website: "example.com",
-      country: { name: "Germany", code: "DE" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "9",
-      website: "example.com",
-      country: { name: "United States", code: "US" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-    {
-      id: "10",
-      website: "example.com",
-      country: { name: "Germany", code: "DE" },
-      language: "United States",
-      category: "Computer & Electronics",
-      otherCategories: "Entertainment",
-    },
-  ];
-
   const greyNiches = ["bitcoin", "dice", "dollar", "medical", "incognito", "leaves"]
   
   const getGreyNicheIcon = (iconName: string) => {
@@ -119,11 +39,17 @@ import { useFormStore } from "@/stores/add-website-form-store";
   
   
   export default function MyWebsitesTable() {
+    const router = useRouter()
     const currentPage = 1; 
     const totalPages = 10; 
 
     const tableData = useFormStore((state) => state.tableData)
     console.log(tableData,"tableData")  
+
+    const handleRowClick = (row: WebsiteFormData) => {
+      console.log(row,"w")
+      router.push(`/my-websites/${row.id}`)
+    }
   
     return (
       <div>
@@ -140,16 +66,14 @@ import { useFormStore } from "@/stores/add-website-form-store";
           </TableHeader>
           <TableBody>
             {tableData?.map((item) => (
-              <TableRow key={item.websiteUrl}>
+              <TableRow key={item.websiteUrl} className="cursor-pointer" onClick={() => handleRowClick(item)}>
                 <TableCell className="font-normal text-foreground">{item.websiteUrl}</TableCell>
                 <TableCell className="flex items-center gap-2">
-                  {/* {item.country.code === "US" && <span role="img" aria-label="US Flag">🇺🇸</span>}
-                  {item.country.code === "DE" && <span role="img" aria-label="DE Flag">🇩🇪</span>}
-                  {item.country.name} */}
+                {item.country}
                 </TableCell>
-                <TableCell className="font-normal text-foreground">{item.primaryLanguage}</TableCell>
+                <TableCell className="font-normal text-foreground">{item.language}</TableCell>
                 <TableCell className="font-normal text-foreground">
-                    {item.majorityTraffic}
+                    {item.mainCategories}
                 </TableCell>
                 <TableCell className="font-normal text-foreground">{item.mainCategories}</TableCell>
                 <TableCell className="text-right">
