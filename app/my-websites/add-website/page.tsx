@@ -1,7 +1,7 @@
 "use client";
 
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
@@ -75,7 +75,17 @@ const formSchema = z.object({
       message: "Minimum 350 Characters",
     }),
   isArticleIncluded: z.enum(["yes", "no"]),
-  numberOfWords: z.enum(["not-limited", "no"]),
+  numberOfWords: z.string(),
+  numberOfWordsMinWords: z.coerce
+    .number()
+    .min(1, { message: "Minimum must be greater than 0" })
+    .optional()
+    .or(z.literal("")),
+  numberOfWordsMaxWords: z.coerce
+    .number()
+    .min(1, { message: "Maximum must be greater than 0" })
+    .optional()
+    .or(z.literal("")),
   doFollow: z.enum(["yes", "no"]),
   linksAllowed: z.enum(["brand-links", "branded-generic", "mixed", "all"]),
   taggingArticles: z.enum(["not-tag", "tagged-only", "tag-articles", "all"]),
@@ -98,10 +108,20 @@ export default function AddWebsite() {
       homepageLinkPrice: 54,
       isArticleIncluded: "yes",
       numberOfWords: "not-limited",
+      numberOfWordsMinWords: "",
+      numberOfWordsMaxWords: "",
       doFollow: "yes",
       linksAllowed: "brand-links",
       taggingArticles: "not-tag",
+      numberOfLinks: "not-tag",
+      otherLinks: "yes",
+      articleDescription: "",
     },
+  });
+
+  const selectedValue = useWatch({
+    control: form.control,
+    name: "numberOfWords",
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -354,7 +374,6 @@ export default function AddWebsite() {
                               <div className="flex items-center">
                                 <Dollar />
                                 <Input
-                                  type="number"
                                   {...field}
                                   onChange={(event) => {
                                     field.onChange(event.target.value);
@@ -377,7 +396,6 @@ export default function AddWebsite() {
                               <div className="flex items-center">
                                 <Dollar />
                                 <Input
-                                  type="number"
                                   {...field}
                                   onChange={(event) => {
                                     field.onChange(event.target.value);
@@ -404,7 +422,6 @@ export default function AddWebsite() {
                               <div className="flex items-center">
                                 <Dollar />
                                 <Input
-                                  type="number"
                                   {...field}
                                   onChange={(event) => {
                                     field.onChange(event.target.value);
@@ -481,6 +498,7 @@ export default function AddWebsite() {
                       </FormItem>
                     )}
                   />
+                  <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="numberOfWords"
@@ -518,6 +536,36 @@ export default function AddWebsite() {
                       </FormItem>
                     )}
                   />
+
+                  {selectedValue === "no" && (
+                    <div className="flex gap-12 px-6">
+                      <FormField
+                        control={form.control}
+                        name="numberOfWordsMinWords"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input className="w-20" placeholder="Min" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="numberOfWordsMaxWords"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input className="w-20" placeholder="Max" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                  </div>
                   <FormField
                     control={form.control}
                     name="doFollow"
@@ -665,7 +713,7 @@ export default function AddWebsite() {
                   />
                   <FormField
                     control={form.control}
-                    name="numberOfWords"
+                    name="numberOfLinks"
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <FormLabel className="font-normal">
@@ -701,7 +749,7 @@ export default function AddWebsite() {
                   />
                   <FormField
                     control={form.control}
-                    name="doFollow"
+                    name="otherLinks"
                     render={({ field }) => (
                       <FormItem className="space-y-3">
                         <FormLabel className="font-normal">
@@ -739,7 +787,7 @@ export default function AddWebsite() {
                   />
                   <FormField
                     control={form.control}
-                    name="homepageLinkDescription"
+                    name="articleDescription"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
