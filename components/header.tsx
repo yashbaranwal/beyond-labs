@@ -18,8 +18,13 @@ const Header = () => {
   return (
     <header className="flex items-center px-6 border-b bg-secondary sticky top-0 z-[999]">
       <div className="flex items-center justify-between w-8/12">
-        <Image src="/logo.svg" alt="Kraken" width={151} height={58}
-        className="ml-2"
+        <Image
+          src="/logo.svg"
+          alt="Kraken"
+          width={151}
+          height={58}
+          className="ml-2"
+          priority
         />
         <nav className="flex items-center">
           {links.map((link) => {

@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -41,9 +43,9 @@ import { useFormStore } from "@/stores/add-website-form-store";
 import { flagComponentsMap, languages } from "@/constants/languages";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { WebsiteFormInput } from "@/types/website-form";
 
-const formSchema = z.object({
+export const formSchema = z.object({
   acceptPreconditions: z.boolean(),
   websiteUrl: z
     .string()
@@ -94,24 +96,34 @@ const formSchema = z.object({
   doFollow: z.enum(["yes", "no"]),
   linksAllowed: z.enum(["brand-links", "branded-generic", "mixed", "all"]),
   taggingArticles: z.enum(["not-tag", "tagged-only", "tag-articles", "all"]),
-  numberOfLinks: z.enum(["not-tag"]),
+  numberOfLinks: z.string(),
+  numberOfLinksMin: z.coerce
+    .number()
+    .min(1, { message: "Minimum must be greater than 0" })
+    .optional()
+    .or(z.literal("")),
+  numberOfLinksMax: z.coerce
+    .number()
+    .min(1, { message: "Maximum must be greater than 0" })
+    .optional()
+    .or(z.literal("")),
   otherLinks: z.enum(["yes", "no"]),
   articleDescription: z.string().optional(),
 });
 
 export default function AddWebsite() {
-  const router = useRouter()
-  const [openItem, setOpenItem] = useState<string|undefined>("item-1")
-  const {addFormData} = useFormStore()
+  const router = useRouter();
+  const [openItem, setOpenItem] = useState<string | undefined>("item-1");
+  const { addFormData } = useFormStore();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<WebsiteFormInput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       acceptPreconditions: false,
       websiteUrl: "",
       language: "en-GB",
       country: "en-US",
-      mainCategories: ["art", "energy-solar-energy" ,"gaming"],
+      mainCategories: ["art", "energy-solar-energy", "gaming"],
       isOwner: false,
       normalOfferGuestPosting: 54,
       normalOfferLinkInsertion: 54,
@@ -124,6 +136,8 @@ export default function AddWebsite() {
       linksAllowed: "brand-links",
       taggingArticles: "not-tag",
       numberOfLinks: "not-tag",
+      numberOfLinksMin: "",
+      numberOfLinksMax: "",
       otherLinks: "yes",
       articleDescription: "",
     },
@@ -134,24 +148,27 @@ export default function AddWebsite() {
     name: "numberOfWords",
   });
 
+  const numberOfLinksValue = useWatch({
+    control: form.control,
+    name: "numberOfLinks",
+  });
+
   const isAccepted = useWatch({
     control: form.control,
     name: "acceptPreconditions",
-  })
+  });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-
-    console.log(data);
-    addFormData(data);
-    router.push("/my-websites")
+    addFormData({ ...data, id: uuidv4() });
+    router.push("/my-websites");
   };
 
   const handleAccept = () => {
-    form.setValue("acceptPreconditions", true)
-    setOpenItem(undefined)
-  }
+    form.setValue("acceptPreconditions", true);
+    setOpenItem(undefined);
+  };
   // console.log(form.formState.errors,"F")
-  
+
   return (
     <main className="bg-background p-6">
       <h2 className="font-semibold xl:ml-24 text-3xl text-foreground">
@@ -193,10 +210,7 @@ export default function AddWebsite() {
               {isAccepted ? (
                 <AcceptBadge />
               ) : (
-                <Button
-                  className="w-48"
-                  onClick={handleAccept}
-                >
+                <Button className="w-48" onClick={handleAccept}>
                   Accept
                 </Button>
               )}
@@ -280,10 +294,7 @@ export default function AddWebsite() {
                               const FlagComponent =
                                 flagComponentsMap[ele.flagCode];
                               return (
-                                <SelectItem
-                                  key={ele.value}
-                                  value={ele.value}
-                                >
+                                <SelectItem key={ele.value} value={ele.value}>
                                   <div className="flex items-center gap-2">
                                     {FlagComponent && (
                                       <FlagComponent className="h-4 w-4" />
@@ -758,42 +769,80 @@ export default function AddWebsite() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="numberOfLinks"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel className="font-normal">
-                          A number of links to the advertiser in the article:
-                        </FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-col"
-                          >
-                            <FormItem className="flex items-center gap-3">
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="numberOfLinks"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="font-normal">
+                            A number of links to the advertiser in the article:
+                          </FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col"
+                            >
+                              <FormItem className="flex items-center gap-3">
+                                <FormControl>
+                                  <RadioGroupItem value="not-tag" />
+                                </FormControl>
+                                <FormLabel className="radio-form-label">
+                                  We do not tag paid articles.
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center gap-3">
+                                <FormControl>
+                                  <RadioGroupItem value="no" />
+                                </FormControl>
+                                <FormLabel className="radio-form-label">
+                                  A maximum number of links to the advertiser:
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {numberOfLinksValue === "no" && (
+                      <div className="flex gap-12 px-6">
+                        <FormField
+                          control={form.control}
+                          name="numberOfLinksMin"
+                          render={({ field }) => (
+                            <FormItem>
                               <FormControl>
-                                <RadioGroupItem value="not-limited" />
+                                <Input
+                                  className="w-20"
+                                  placeholder="Min"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormLabel className="radio-form-label">
-                                We do not tag paid articles.
-                              </FormLabel>
+                              <FormMessage />
                             </FormItem>
-                            <FormItem className="flex items-center gap-3">
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="numberOfLinksMax"
+                          render={({ field }) => (
+                            <FormItem>
                               <FormControl>
-                                <RadioGroupItem value="no" />
+                                <Input
+                                  className="w-20"
+                                  placeholder="Max"
+                                  {...field}
+                                />
                               </FormControl>
-                              <FormLabel className="radio-form-label">
-                                A maximum number of links to the advertiser:
-                              </FormLabel>
+                              <FormMessage />
                             </FormItem>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                          )}
+                        />
+                      </div>
                     )}
-                  />
+                  </div>
                   <FormField
                     control={form.control}
                     name="otherLinks"
