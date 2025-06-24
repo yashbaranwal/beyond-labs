@@ -48,10 +48,10 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Website URL is required" })
     .url({ message: "Please enter a valid URL (e.g., https://beyondlabs.io)" }),
-  primaryLanguage: z.string({
+  language: z.string({
     required_error: "Please select language",
   }),
-  majorityTraffic: z.string({
+  country: z.string({
     required_error: "Please select an option",
   }),
   mainCategories: z.array(z.string()).optional(),
@@ -99,15 +99,15 @@ const formSchema = z.object({
 });
 
 export default function AddWebsite() {
-  const [openItem, setOpenItem] = useState("item-1")
+  const [openItem, setOpenItem] = useState<string|undefined>("item-1")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       acceptPreconditions: false,
       websiteUrl: "",
-      primaryLanguage: "en-GB",
-      majorityTraffic: "en-US",
+      language: "en-GB",
+      country: "en-US",
       mainCategories: ["art", "energy-solar-energy" ,"gaming"],
       isOwner: false,
       normalOfferGuestPosting: 54,
@@ -144,9 +144,10 @@ export default function AddWebsite() {
 
   const handleAccept = () => {
     form.setValue("acceptPreconditions", true)
-    setOpenItem(undefined) // close the accordion
+    setOpenItem(undefined)
   }
-
+  // console.log(form.formState.errors,"F")
+  
   return (
     <main className="bg-background p-6">
       <h2 className="font-semibold xl:ml-24 text-3xl text-foreground">
@@ -219,7 +220,7 @@ export default function AddWebsite() {
                   />
                   <FormField
                     control={form.control}
-                    name="primaryLanguage"
+                    name="language"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Website&apos;s Primary language</FormLabel>
@@ -255,7 +256,7 @@ export default function AddWebsite() {
                   />
                   <FormField
                     control={form.control}
-                    name="majorityTraffic"
+                    name="country"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
@@ -271,19 +272,19 @@ export default function AddWebsite() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {countries.map((country) => {
+                            {countries.map((ele) => {
                               const FlagComponent =
-                                flagComponentsMap[country.flagCode];
+                                flagComponentsMap[ele.flagCode];
                               return (
                                 <SelectItem
-                                  key={country.value}
-                                  value={country.value}
+                                  key={ele.value}
+                                  value={ele.value}
                                 >
                                   <div className="flex items-center gap-2">
                                     {FlagComponent && (
                                       <FlagComponent className="h-4 w-4" />
                                     )}
-                                    <span>{country.label}</span>
+                                    <span>{ele.label}</span>
                                   </div>
                                 </SelectItem>
                               );

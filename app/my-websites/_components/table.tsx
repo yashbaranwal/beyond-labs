@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image";
 import {
     Table,
@@ -16,6 +18,7 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination";
+import { useFormStore } from "@/stores/add-website-form-store";
       
   const data = [
     {
@@ -118,6 +121,9 @@ import {
   export default function MyWebsitesTable() {
     const currentPage = 1; 
     const totalPages = 10; 
+
+    const tableData = useFormStore((state) => state.tableData)
+    console.log(tableData,"tableData")  
   
     return (
       <div>
@@ -133,19 +139,19 @@ import {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-normal text-foreground">{item.website}</TableCell>
+            {tableData?.map((item) => (
+              <TableRow key={item.websiteUrl}>
+                <TableCell className="font-normal text-foreground">{item.websiteUrl}</TableCell>
                 <TableCell className="flex items-center gap-2">
-                  {item.country.code === "US" && <span role="img" aria-label="US Flag">🇺🇸</span>}
+                  {/* {item.country.code === "US" && <span role="img" aria-label="US Flag">🇺🇸</span>}
                   {item.country.code === "DE" && <span role="img" aria-label="DE Flag">🇩🇪</span>}
-                  {item.country.name}
+                  {item.country.name} */}
                 </TableCell>
-                <TableCell className="font-normal text-foreground">{item.language}</TableCell>
+                <TableCell className="font-normal text-foreground">{item.primaryLanguage}</TableCell>
                 <TableCell className="font-normal text-foreground">
-                    {item.category}
+                    {item.majorityTraffic}
                 </TableCell>
-                <TableCell className="font-normal text-foreground">{item.otherCategories}</TableCell>
+                <TableCell className="font-normal text-foreground">{item.mainCategories}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center gap-3">
                     {greyNiches.map((niche, index) => (
