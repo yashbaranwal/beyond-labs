@@ -1,9 +1,11 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import MyWebsitesTable from "./_components/table";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import { useFormStore } from "@/stores/formStore"
+import MyWebsitesTable from "./_components/table";
 
 export default function MyWebsites() {
   const router = useRouter()
@@ -11,7 +13,8 @@ export default function MyWebsites() {
   const handleAddWebsite = () => {
     router.push("/my-websites/add-website")
   }
-
+  const tableData = useFormStore((state) => state.tableData)
+  console.log(tableData,"tableData")
   return (
     <main className="bg-background p-6">
       <h3 className="font-semibold text-2xl text-foreground">All websites</h3>

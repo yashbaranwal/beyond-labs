@@ -1,6 +1,7 @@
 "use client";
 
 import { z } from "zod";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -33,13 +34,16 @@ import { Button } from "@/components/ui/button";
 import { countries } from "@/constants/countries";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import AcceptBadge from "@/components/accept-badge";
 import { mainCategories } from "@/constants/categories";
 import BulletSection from "./_components/bullet-section";
+import { useFormStore } from "@/stores/add-website-form-store";
 import { flagComponentsMap, languages } from "@/constants/languages";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formSchema = z.object({
+  acceptPreconditions: z.boolean(),
   websiteUrl: z
     .string()
     .min(1, { message: "Website URL is required" })
@@ -95,13 +99,16 @@ const formSchema = z.object({
 });
 
 export default function AddWebsite() {
+  const [openItem, setOpenItem] = useState("item-1")
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      acceptPreconditions: false,
       websiteUrl: "",
       primaryLanguage: "en-GB",
       majorityTraffic: "en-US",
-      mainCategories: [],
+      mainCategories: ["art", "energy-solar-energy" ,"gaming"],
       isOwner: false,
       normalOfferGuestPosting: 54,
       normalOfferLinkInsertion: 54,
@@ -124,20 +131,34 @@ export default function AddWebsite() {
     name: "numberOfWords",
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const isAccepted = useWatch({
+    control: form.control,
+    name: "acceptPreconditions",
+  })
+
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+
+    console.log(data);
+    useFormStore.getState().addFormData(data);
   };
+
+  const handleAccept = () => {
+    form.setValue("acceptPreconditions", true)
+    setOpenItem(undefined) // close the accordion
+  }
 
   return (
     <main className="bg-background p-6">
-      <h2 className="font-semibold ml-24 text-3xl text-foreground">
+      <h2 className="font-semibold xl:ml-24 text-3xl text-foreground">
         Add a website
       </h2>
-      <div className="mt-18 px-16 space-y-16">
+      <div className="mt-18 xl:px-16 space-y-16">
         <BulletSection />
         <Accordion
           type="single"
           collapsible
+          value={openItem}
+          onValueChange={setOpenItem}
           className="px-6 py-0 bg-secondary border border-gray rounded-md"
         >
           <AccordionItem value="item-1">
@@ -145,13 +166,17 @@ export default function AddWebsite() {
               <p className="flex-1">
                 Hey, Accept Preconditions before you start the listing!
               </p>
-              <Badge variant="pending">
-                <div className="size-3 bg-lemon rounded-full mr-2" />
-                Pending
-              </Badge>
+              {isAccepted ? (
+                <AcceptBadge />
+              ) : (
+                <Badge variant="pending">
+                  <div className="size-3 bg-lemon rounded-full mr-2" />
+                  Pending
+                </Badge>
+              )}
             </AccordionTrigger>
             <AccordionContent>
-              <p className="font-regular text-sm text-foreground/60 max-w-6xl">
+              <p className="font-regular text-sm text-foreground/60 max-w-6xl mb-4">
                 Before you can proceed with your listing, please make sure to
                 review all required preconditions. Accepting these is mandatory
                 to continue. It ensures your submission meets our platform
@@ -160,7 +185,16 @@ export default function AddWebsite() {
                 carefully before moving ahead. Once accepted, you&apos;ll be
                 able to start listing right away.
               </p>
-              <Button className="mt-4 w-48">Accept</Button>
+              {isAccepted ? (
+                <AcceptBadge />
+              ) : (
+                <Button
+                  className="w-48"
+                  onClick={handleAccept}
+                >
+                  Accept
+                </Button>
+              )}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -169,7 +203,7 @@ export default function AddWebsite() {
             <div className="space-y-6">
               <h3 className="heading-three">Website Detail</h3>
               <div className="bg-white rounded-sm p-6 space-y-8">
-                <div className="grid grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
                   <FormField
                     control={form.control}
                     name="websiteUrl"
@@ -459,7 +493,7 @@ export default function AddWebsite() {
 
             <div className="space-y-6">
               <h3 className="heading-three">Article specification</h3>
-              <div className="bg-white rounded-sm p-6 flex items-start gap-4 w-10/12">
+              <div className="bg-white rounded-sm p-6 grid grid-cols-1 xl:grid-cols-2 gap-4 xl:w-10/12">
                 <div className="flex-1 space-y-12">
                   <FormField
                     control={form.control}
@@ -499,72 +533,80 @@ export default function AddWebsite() {
                     )}
                   />
                   <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="numberOfWords"
-                    render={({ field }) => (
-                      <FormItem className="space-y-3">
-                        <FormLabel className="font-normal">
-                          Number of words in the article
-                        </FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-col"
-                          >
-                            <FormItem className="flex items-center gap-3">
-                              <FormControl>
-                                <RadioGroupItem value="not-limited" />
-                              </FormControl>
-                              <FormLabel className="radio-form-label">
-                                Length of the article is not limited.
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center gap-3">
-                              <FormControl>
-                                <RadioGroupItem value="no" />
-                              </FormControl>
-                              <FormLabel className="radio-form-label">
-                                No, the advertiser (client) needs to provide the
-                                content
-                              </FormLabel>
-                            </FormItem>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="numberOfWords"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="font-normal">
+                            Number of words in the article
+                          </FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col"
+                            >
+                              <FormItem className="flex items-center gap-3">
+                                <FormControl>
+                                  <RadioGroupItem value="not-limited" />
+                                </FormControl>
+                                <FormLabel className="radio-form-label">
+                                  Length of the article is not limited.
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center gap-3">
+                                <FormControl>
+                                  <RadioGroupItem value="no" />
+                                </FormControl>
+                                <FormLabel className="radio-form-label">
+                                  No, the advertiser (client) needs to provide
+                                  the content
+                                </FormLabel>
+                              </FormItem>
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  {selectedValue === "no" && (
-                    <div className="flex gap-12 px-6">
-                      <FormField
-                        control={form.control}
-                        name="numberOfWordsMinWords"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input className="w-20" placeholder="Min" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="numberOfWordsMaxWords"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input className="w-20" placeholder="Max" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  )}
+                    {selectedValue === "no" && (
+                      <div className="flex gap-12 px-6">
+                        <FormField
+                          control={form.control}
+                          name="numberOfWordsMinWords"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  className="w-20"
+                                  placeholder="Min"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="numberOfWordsMaxWords"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  className="w-20"
+                                  placeholder="Max"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
                   </div>
                   <FormField
                     control={form.control}
