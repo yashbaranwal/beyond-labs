@@ -21,8 +21,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { countries } from "@/constants/countries";
 import { WebsiteFormData } from "@/types/website-form";
+import { mainCategories } from "@/constants/categories";
 import { useFormStore } from "@/stores/add-website-form-store";
+import { flagComponentsMap, languages } from "@/constants/languages";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -58,7 +61,6 @@ export default function MyWebsitesTable() {
   const router = useRouter();
   const tableData = useFormStore((state) => state.tableData);
   const [currentPage, setCurrentPage] = useState(1);
-console.log(tableData)
   const totalPages = Math.ceil(tableData.length / ITEMS_PER_PAGE);
 
   const paginatedData = tableData.slice(
@@ -72,6 +74,32 @@ console.log(tableData)
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const getCountry = (val: string) => {
+    const country = countries.find((ele) => ele.value === val);
+    const FlagComponent = flagComponentsMap[country.flagCode];
+    return (
+      <div className="flex items-center gap-2">
+        <FlagComponent className="size-4" />
+        <p className="font-normal text-foreground">{country.label}</p>
+      </div>
+    );
+  };
+
+  const getLanguage = (val: string) => {
+    const language = languages.find((ele) => ele.value === val);
+    return language.label;
+  };
+
+  const getCategoryLabel = (val: string) => {
+    const category = mainCategories.find((ele) => ele.value === val);
+    return category.label;
+  };
+
+  const getOtherCategories = (values: Array<string>) => {
+    const modifiedValues = values.map((ele) => getCategoryLabel(ele));
+    return modifiedValues.join(", ");
   };
 
   return (
@@ -96,11 +124,13 @@ console.log(tableData)
             >
               <TableCell>{item.websiteUrl}</TableCell>
               <TableCell className="flex items-center gap-2">
-                {item.country}
+                {getCountry(item.country)}
               </TableCell>
-              <TableCell>{item.language}</TableCell>
-              <TableCell>{item.mainCategories?.join(", ")}</TableCell>
-              <TableCell>{item.mainCategories?.join(", ")}</TableCell>
+              <TableCell>{getLanguage(item.language)}</TableCell>
+              <TableCell>{getCategoryLabel(item.mainCategories[0])}</TableCell>
+              <TableCell>
+                {getOtherCategories(item.mainCategories?.slice(1))}
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
                   {greyNiches.map((niche, index) => (
