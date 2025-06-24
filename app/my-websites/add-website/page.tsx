@@ -1,8 +1,8 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   Accordion,
@@ -10,7 +10,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -19,9 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import BulletSection from "./_components/bullet-section";
 import {
   Form,
   FormControl,
@@ -30,11 +26,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import Dollar from "@/components/dollar";
 import { Input } from "@/components/ui/input";
-import { flagComponentsMap, languages } from "@/constants/languages";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { countries } from "@/constants/countries";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { mainCategories } from "@/constants/categories";
+import BulletSection from "./_components/bullet-section";
+import { flagComponentsMap, languages } from "@/constants/languages";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formSchema = z.object({
   websiteUrl: z
@@ -54,6 +57,31 @@ const formSchema = z.object({
       message: "Minimum 350 Characters",
     }),
   isOwner: z.boolean().optional(),
+  normalOfferGuestPosting: z.coerce
+    .number()
+    .min(0, { message: "Value cannot be negative" })
+    .optional(),
+  normalOfferLinkInsertion: z.coerce
+    .number()
+    .min(0, { message: "Value cannot be negative" })
+    .optional(),
+  homepageLinkPrice: z.coerce
+    .number()
+    .min(0, { message: "Value cannot be negative" })
+    .optional(),
+  homepageLinkDescription: z
+    .string({ required_error: "Description is required" })
+    .min(350, {
+      message: "Minimum 350 Characters",
+    }),
+  isArticleIncluded: z.enum(["yes", "no"]),
+  numberOfWords: z.enum(["not-limited", "no"]),
+  doFollow: z.enum(["yes", "no"]),
+  linksAllowed: z.enum(["brand-links", "branded-generic", "mixed", "all"]),
+  taggingArticles: z.enum(["not-tag", "tagged-only", "tag-articles", "all"]),
+  numberOfLinks: z.enum(["not-tag"]),
+  otherLinks: z.enum(["yes", "no"]),
+  articleDescription: z.string().optional(),
 });
 
 export default function AddWebsite() {
@@ -65,6 +93,14 @@ export default function AddWebsite() {
       majorityTraffic: "en-US",
       mainCategories: [],
       isOwner: false,
+      normalOfferGuestPosting: 54,
+      normalOfferLinkInsertion: 54,
+      homepageLinkPrice: 54,
+      isArticleIncluded: "yes",
+      numberOfWords: "not-limited",
+      doFollow: "yes",
+      linksAllowed: "brand-links",
+      taggingArticles: "not-tag",
     },
   });
 
@@ -98,19 +134,19 @@ export default function AddWebsite() {
               <p className="font-regular text-sm text-foreground/60 max-w-6xl">
                 Before you can proceed with your listing, please make sure to
                 review all required preconditions. Accepting these is mandatory
-                to continue. It ensures your submission meets our
-                platformstandards and avoids delays. Listings that don&apos;t
-                meet these terms may be rejected. Take a moment to go through
-                them carefully before moving ahead. Once accepted, you&apos;ll
-                be able to start listing right away.
+                to continue. It ensures your submission meets our platform
+                standards and avoids delays. Listings that don&apos;t meet these
+                terms may be rejected. Take a moment to go through them
+                carefully before moving ahead. Once accepted, you&apos;ll be
+                able to start listing right away.
               </p>
               <Button className="mt-4 w-48">Accept</Button>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-14">
+            <div className="space-y-6">
               <h3 className="heading-three">Website Detail</h3>
               <div className="bg-white rounded-sm p-6 space-y-8">
                 <div className="grid grid-cols-4 gap-8">
@@ -292,7 +328,440 @@ export default function AddWebsite() {
                 />
               </div>
             </div>
-            <Button type="submit">Save</Button>
+
+            <div className="space-y-6">
+              <h3 className="heading-three">Create offer</h3>
+              <div className="bg-white rounded-sm p-6 space-y-8 w-10/12">
+                <Tabs defaultValue="normal-offer">
+                  <TabsList>
+                    <TabsTrigger value="normal-offer">Normal offer</TabsTrigger>
+                    <TabsTrigger value="grey-niche-offer">
+                      Grey Niche offer
+                    </TabsTrigger>
+                    <TabsTrigger value="homepage-link">
+                      Homepage link
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="normal-offer">
+                    <div className="pt-10 flex items-center gap-8">
+                      <FormField
+                        control={form.control}
+                        name="normalOfferGuestPosting"
+                        render={({ field }) => (
+                          <FormItem className="w-3/12">
+                            <FormLabel>Guest posting</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center">
+                                <Dollar />
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(event) => {
+                                    field.onChange(event.target.value);
+                                  }}
+                                  className="flex-1 rounded-l-none focus-visible:z-10"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="normalOfferLinkInsertion"
+                        render={({ field }) => (
+                          <FormItem className="w-3/12">
+                            <FormLabel>Link insertion</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center">
+                                <Dollar />
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(event) => {
+                                    field.onChange(event.target.value);
+                                  }}
+                                  className="flex-1 rounded-l-none focus-visible:z-10"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="homepage-link">
+                    <div className="pt-8 space-y-8">
+                      <FormField
+                        control={form.control}
+                        name="homepageLinkPrice"
+                        render={({ field }) => (
+                          <FormItem className="w-3/12">
+                            <FormLabel>Price</FormLabel>
+                            <FormControl>
+                              <div className="flex items-center">
+                                <Dollar />
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(event) => {
+                                    field.onChange(event.target.value);
+                                  }}
+                                  className="flex-1 rounded-l-none focus-visible:z-10"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="homepageLinkDescription"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Offer Guidelines</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder="Description"
+                                className="h-28 w-6/12"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h3 className="heading-three">Article specification</h3>
+              <div className="bg-white rounded-sm p-6 flex items-start gap-4 w-10/12">
+                <div className="flex-1 space-y-12">
+                  <FormField
+                    control={form.control}
+                    name="isArticleIncluded"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          Is writing of an article included in the offer?
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="yes" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Yes
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                No, the advertiser (client) needs to provide the
+                                content
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="numberOfWords"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          Number of words in the article
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="not-limited" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Length of the article is not limited.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                No, the advertiser (client) needs to provide the
+                                content
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="doFollow"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          I allow DOFOLLOW links in the article
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="yes" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Yes
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                No
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="linksAllowed"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          Type of links allowed:
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="brand-links" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Only brand links, URL, navigational, graphic
+                                links.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="branded-generic" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Only branded and generic links.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="mixed" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Also mixed links (partly exact match anchors).
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="all" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                All links, including exact match anchors.
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex-1 space-y-12">
+                  <FormField
+                    control={form.control}
+                    name="taggingArticles"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          Tagging articles policy:
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="not-tag" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                We do not tag paid articles.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="tagged-only" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                Articles are tagged only at the
+                                advertiser&apos;s request.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="tag-articles" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                We always tag articles: &quot;Sponsored
+                                article&quot;.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="all" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                All links, including exact match anchors.
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="numberOfWords"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          A number of links to the advertiser in the article:
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="not-limited" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                We do not tag paid articles.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                A maximum number of links to the advertiser:
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="doFollow"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="font-normal">
+                          Other links in the article:
+                        </FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col"
+                          >
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="yes" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                We allow links to other websites in the content
+                                of the article.
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center gap-3">
+                              <FormControl>
+                                <RadioGroupItem value="no" />
+                              </FormControl>
+                              <FormLabel className="radio-form-label">
+                                We DO NOT allow links to other websites in the
+                                content of the article.
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="homepageLinkDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Other content rules/specifications:{" "}
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Description"
+                            className="h-28"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+            <Button className="w-64" type="submit">
+              Save
+            </Button>
           </form>
         </Form>
       </div>

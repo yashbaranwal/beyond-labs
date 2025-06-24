@@ -126,4 +126,7 @@
   .heading-three{
     @apply font-semibold text-2xl text-foreground leading-[40px]
   }
+  .radio-form-label{
+    @apply !text-foreground/60 !font-normal
+  }
 }
