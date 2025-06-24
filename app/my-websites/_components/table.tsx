@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 import {
   Table,
@@ -26,10 +26,13 @@ import { WebsiteFormData } from "@/types/website-form";
 import { mainCategories } from "@/constants/categories";
 import { useFormStore } from "@/stores/add-website-form-store";
 import { flagComponentsMap, languages } from "@/constants/languages";
+// import { tableData } from "@/constants/sample-table-data";
 
 const ITEMS_PER_PAGE = 5;
 
-const greyNiches = [
+type GreyNicheIcon = "bitcoin" | "dice" | "dollar" | "medical" | "incognito" | "leaves";
+
+const greyNiches: GreyNicheIcon[] = [
   "bitcoin",
   "dice",
   "dollar",
@@ -38,69 +41,61 @@ const greyNiches = [
   "leaves",
 ];
 
-const getGreyNicheIcon = (iconName: string) => {
-  switch (iconName) {
-    case "bitcoin":
-      return "bitcoin";
-    case "dice":
-      return "dice";
-    case "dollar":
-      return "dollar";
-    case "medical":
-      return "medical";
-    case "incognito":
-      return "incognito";
-    case "leaves":
-      return "leaves";
-    default:
-      return null;
-  }
-};
+const getGreyNicheIcon = (iconName: GreyNicheIcon): string => iconName;
 
 export default function MyWebsitesTable() {
   const router = useRouter();
   const tableData = useFormStore((state) => state.tableData);
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(tableData.length / ITEMS_PER_PAGE);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const paginatedData = tableData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const totalPages = useMemo(() => Math.ceil(tableData.length / ITEMS_PER_PAGE), [tableData.length]);
 
-  const handleRowClick = (row: WebsiteFormData) => {
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return tableData.slice(startIndex, endIndex);
+  }, [currentPage, tableData]);
+
+  const handleRowClick = useCallback((row: WebsiteFormData) => {
     router.push(`/my-websites/${row.id}`);
-  };
+  }, [router]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-  };
+  }, []);
 
-  const getCountry = (val: string) => {
+  const getCountry = useCallback((val: string) => {
     const country = countries.find((ele) => ele.value === val);
-    const FlagComponent = flagComponentsMap[country.flagCode];
+    if (!country) return null;
+
+    const FlagComponent = flagComponentsMap[country.flagCode as keyof typeof flagComponentsMap];
+    if (!FlagComponent) return null;
+
     return (
       <div className="flex items-center gap-2">
         <FlagComponent className="size-4" />
         <p className="font-normal text-foreground">{country.label}</p>
       </div>
     );
-  };
+  }, []);
 
-  const getLanguage = (val: string) => {
+  const getLanguage = useCallback((val: string) => {
     const language = languages.find((ele) => ele.value === val);
-    return language.label;
-  };
+    return language?.label || "N/A";
+  }, []);
 
-  const getCategoryLabel = (val: string) => {
+  const getCategoryLabel = useCallback((val: string) => {
     const category = mainCategories.find((ele) => ele.value === val);
-    return category.label;
-  };
+    return category?.label || "N/A";
+  }, []);
 
-  const getOtherCategories = (values: Array<string>) => {
+  const getOtherCategories = useCallback((values: string[]) => {
+    if (!Array.isArray(values) || values.length === 0) {
+      return "N/A";
+    }
     const modifiedValues = values.map((ele) => getCategoryLabel(ele));
     return modifiedValues.join(", ");
-  };
+  }, [getCategoryLabel]);
 
   return (
     <div>
@@ -116,40 +111,50 @@ export default function MyWebsitesTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedData.map((item) => (
-            <TableRow
-              key={item.websiteUrl}
-              className="cursor-pointer"
-              onClick={() => handleRowClick(item)}
-            >
-              <TableCell>{item.websiteUrl}</TableCell>
-              <TableCell className="flex items-center gap-2">
-                {getCountry(item.country)}
-              </TableCell>
-              <TableCell>{getLanguage(item.language)}</TableCell>
-              <TableCell>{getCategoryLabel(item.mainCategories[0])}</TableCell>
-              <TableCell>
-                {getOtherCategories(item.mainCategories?.slice(1))}
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  {greyNiches.map((niche, index) => (
-                    <Image
-                      key={index}
-                      width={16}
-                      height={16}
-                      src={`/icons/${getGreyNicheIcon(niche)}.svg`}
-                      alt="icon"
-                    />
-                  ))}
-                </div>
+          {paginatedData.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                No websites added yet.
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            paginatedData.map((item) => (
+              <TableRow
+                key={item.websiteUrl}
+                className="cursor-pointer"
+                onClick={() => handleRowClick(item)}
+              >
+                <TableCell className="font-medium">{item.websiteUrl}</TableCell>
+                <TableCell>
+                  {getCountry(item.country)}
+                </TableCell>
+                <TableCell>{getLanguage(item.language)}</TableCell>
+                <TableCell>{getCategoryLabel(item.mainCategories[0])}</TableCell>
+                <TableCell>
+                  {item.mainCategories.length > 1
+                    ? getOtherCategories(item.mainCategories.slice(1))
+                    : "N/A"}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    {greyNiches.map((niche, index) => (
+                      <Image
+                        key={index}
+                        width={16}
+                        height={16}
+                        src={`/icons/${getGreyNicheIcon(niche)}.svg`}
+                        alt={`${niche} icon`}
+                      />
+                    ))}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
 
-      {totalPages >= 1 && (
+      {totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <Pagination>
             <PaginationContent>
@@ -169,9 +174,11 @@ export default function MyWebsitesTable() {
                 const isFirst = pageNumber === 1;
                 const isLast = pageNumber === totalPages;
                 const isCurrent = pageNumber === currentPage;
-                const isNearCurrent = Math.abs(currentPage - pageNumber) <= 1;
+                const isNearCurrent =
+                  pageNumber === currentPage ||
+                  pageNumber === currentPage - 1 ||
+                  pageNumber === currentPage + 1;
 
-                // Always show first, last, current, and pages near current
                 if (isFirst || isLast || isCurrent || isNearCurrent) {
                   return (
                     <PaginationItem key={pageNumber}>
@@ -189,22 +196,12 @@ export default function MyWebsitesTable() {
                   );
                 }
 
-                // Show ellipsis before current range
-                if (pageNumber === currentPage - 2 && pageNumber !== 2) {
-                  return (
-                    <PaginationItem key={`ellipsis-prev`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  );
-                }
-
-                // Show ellipsis after current range
                 if (
-                  pageNumber === currentPage + 2 &&
-                  pageNumber !== totalPages - 1
+                  (currentPage - pageNumber === 2 && pageNumber > 1) ||
+                  (pageNumber - currentPage === 2 && pageNumber < totalPages)
                 ) {
                   return (
-                    <PaginationItem key={`ellipsis-next`}>
+                    <PaginationItem key={`ellipsis-${pageNumber}`}>
                       <PaginationEllipsis />
                     </PaginationItem>
                   );
