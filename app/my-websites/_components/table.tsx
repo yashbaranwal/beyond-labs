@@ -97,6 +97,8 @@ export default function MyWebsitesTable() {
     return modifiedValues.join(", ");
   }, [getCategoryLabel]);
 
+  console.log(tableData,"tableData")
+  
   return (
     <div>
       <Table>

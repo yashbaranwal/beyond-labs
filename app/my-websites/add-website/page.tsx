@@ -38,12 +38,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import AcceptBadge from "@/components/accept-badge";
 import { mainCategories } from "@/constants/categories";
 import BulletSection from "./_components/bullet-section";
+import { WebsiteFormInput } from "@/types/website-form";
+import { PriceInput } from "@/components/ui/price-input";
 import { useFormStore } from "@/stores/add-website-form-store";
 import { flagComponentsMap, languages } from "@/constants/languages";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WebsiteFormInput } from "@/types/website-form";
-import { PriceInput } from "@/components/ui/price-input";
 
 export const formSchema = z.object({
   acceptPreconditions: z.boolean(),
