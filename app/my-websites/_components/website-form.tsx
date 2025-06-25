@@ -40,13 +40,29 @@ import { mainCategories } from "@/constants/categories";
 import { WebsiteFormInput } from "@/types/website-form";
 import { PriceInput } from "@/components/ui/price-input";
 import { useFormStore } from "@/stores/add-website-form-store";
+import { websitFormTabs } from "@/constants/website-form-tabs";
 import { flagComponentsMap, languages } from "@/constants/languages";
+import BulletSection from "../add-website/_components/bullet-section";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BulletSection from "../add-website/_components/bullet-section";
-import { websitFormTabs } from "@/constants/website-form-tabs";
+
+// Schema for common price fields (guest posting and link insertion)
+const priceSchema = z.coerce
+  .number({
+    invalid_type_error: "Price must be a number",
+  })
+  .min(0, { message: "Value cannot be negative" })
+  .optional();
+
+// Schema for min/max word/link counts
+const minMaxNumberSchema = z.coerce
+  .number()
+  .min(1, { message: "Minimum must be greater than 0" })
+  .optional()
+  .or(z.literal(""));
 
 export const formSchema = z.object({
+  // Basic Information
   acceptPreconditions: z.boolean(),
   websiteUrl: z
     .string()
@@ -65,143 +81,60 @@ export const formSchema = z.object({
       message: "Minimum 350 Characters",
     }),
   isOwner: z.boolean().optional(),
-  normalOfferGuestPosting: z.coerce
-    .number({
-      invalid_type_error: "Price must be a number",
-    })
-    .min(0, { message: "Value cannot be negative" })
-    .optional(),
-  normalOfferLinkInsertion: z.coerce
-    .number({
-      invalid_type_error: "Price must be a number",
-    })
-    .min(0, { message: "Value cannot be negative" })
-    .optional(),
+
+  // Offer Details
+  normalOfferGuestPosting: priceSchema,
+  normalOfferLinkInsertion: priceSchema,
+
+  // Grey Niche Offers
   greyNiche: z.enum(["same-price"]).optional(),
   greyNicheOfferSamePrice: z.string().optional(),
   greyNicheOffers: z.object({
     gambling: z.object({
-      guestPosting: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
-      linkInsertion: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
     }),
     crypto: z.object({
-      guestPosting: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
-      linkInsertion: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
     }),
     adult: z.object({
-      guestPosting: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
-      linkInsertion: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
     }),
     casino: z.object({
-      guestPosting: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
-      linkInsertion: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
     }),
     betting: z.object({
-      guestPosting: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
-      linkInsertion: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
     }),
     forex: z.object({
-      guestPosting: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
-      linkInsertion: z.coerce
-        .number({
-          invalid_type_error: "Price must be a number",
-        })
-        .min(0, { message: "Value cannot be negative" })
-        .optional(),
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
     }),
   }),
-  homepageLinkPrice: z.coerce
-    .number({
-      invalid_type_error: "Price must be a number",
-    })
-    .min(0, { message: "Value cannot be negative" })
-    .optional(),
+
+  // Homepage Link Details
+  homepageLinkPrice: priceSchema,
   homepageLinkDescription: z
     .string({ required_error: "Description is required" })
     .min(350, {
       message: "Minimum 350 Characters",
     }),
+
+  // Article Details
   isArticleIncluded: z.enum(["yes", "no"]),
-  numberOfWords: z.string(),
-  numberOfWordsMinWords: z.coerce
-    .number()
-    .min(1, { message: "Minimum must be greater than 0" })
-    .optional()
-    .or(z.literal("")),
-  numberOfWordsMaxWords: z.coerce
-    .number()
-    .min(1, { message: "Maximum must be greater than 0" })
-    .optional()
-    .or(z.literal("")),
+  numberOfWords: z.enum(["not-limited", "no"]),
+  numberOfWordsMinWords: minMaxNumberSchema,
+  numberOfWordsMaxWords: minMaxNumberSchema,
   doFollow: z.enum(["yes", "no"]),
   linksAllowed: z.enum(["brand-links", "branded-generic", "mixed", "all"]),
   taggingArticles: z.enum(["not-tag", "tagged-only", "tag-articles", "all"]),
-  numberOfLinks: z.string(),
-  numberOfLinksMin: z.coerce
-    .number()
-    .min(1, { message: "Minimum must be greater than 0" })
-    .optional()
-    .or(z.literal("")),
-  numberOfLinksMax: z.coerce
-    .number()
-    .min(1, { message: "Maximum must be greater than 0" })
-    .optional()
-    .or(z.literal("")),
+  numberOfLinks: z.enum(["not-tag", "no"]),
+  numberOfLinksMin: minMaxNumberSchema,
+  numberOfLinksMax: minMaxNumberSchema,
   otherLinks: z.enum(["yes", "no"]),
   articleDescription: z.string().optional(),
 });
