@@ -66,11 +66,15 @@ export const formSchema = z.object({
     }),
   isOwner: z.boolean().optional(),
   normalOfferGuestPosting: z.coerce
-    .number()
+    .number({
+      invalid_type_error: "Price must be a number",
+    })
     .min(0, { message: "Value cannot be negative" })
     .optional(),
   normalOfferLinkInsertion: z.coerce
-    .number()
+    .number({
+      invalid_type_error: "Price must be a number",
+    })
     .min(0, { message: "Value cannot be negative" })
     .optional(),
   greyNiche: z.enum(["same-price"]).optional(),
@@ -78,67 +82,93 @@ export const formSchema = z.object({
   greyNicheOffers: z.object({
     gambling: z.object({
       guestPosting: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
       linkInsertion: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
     }),
     crypto: z.object({
       guestPosting: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
       linkInsertion: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
     }),
     adult: z.object({
       guestPosting: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
       linkInsertion: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
     }),
     casino: z.object({
       guestPosting: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
       linkInsertion: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
     }),
     betting: z.object({
       guestPosting: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
       linkInsertion: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
     }),
     forex: z.object({
       guestPosting: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
       linkInsertion: z.coerce
-        .number()
+        .number({
+          invalid_type_error: "Price must be a number",
+        })
         .min(0, { message: "Value cannot be negative" })
         .optional(),
     }),
   }),
   homepageLinkPrice: z.coerce
-    .number()
+    .number({
+      invalid_type_error: "Price must be a number",
+    })
     .min(0, { message: "Value cannot be negative" })
     .optional(),
   homepageLinkDescription: z
@@ -198,12 +228,12 @@ const WebsiteForm = () => {
       greyNiche: undefined,
       greyNicheOfferSamePrice: "",
       greyNicheOffers: {
-        gambling: { guestPosting: "", linkInsertion: "" },
-        crypto: { guestPosting: "", linkInsertion: "" },
-        adult: { guestPosting: "", linkInsertion: "" },
-        casino: { guestPosting: "", linkInsertion: "" },
-        betting: { guestPosting: "", linkInsertion: "" },
-        forex: { guestPosting: "", linkInsertion: "" },
+        gambling: { guestPosting: undefined, linkInsertion: undefined },
+        crypto: { guestPosting: undefined, linkInsertion: undefined },
+        adult: { guestPosting: undefined, linkInsertion: undefined },
+        casino: { guestPosting: undefined, linkInsertion: undefined },
+        betting: { guestPosting: undefined, linkInsertion: undefined },
+        forex: { guestPosting: undefined, linkInsertion: undefined },
       },
       homepageLinkPrice: 54,
       isArticleIncluded: "yes",
@@ -520,7 +550,7 @@ const WebsiteForm = () => {
                               <PriceInput
                                 {...field}
                                 onChange={(event) => {
-                                  field.onChange(Number(event.target.value));
+                                  field.onChange(event.target.value);
                                 }}
                               />
                             </FormControl>
@@ -538,7 +568,7 @@ const WebsiteForm = () => {
                               <PriceInput
                                 {...field}
                                 onChange={(event) => {
-                                  field.onChange(Number(event.target.value));
+                                  field.onChange(event.target.value);
                                 }}
                               />
                             </FormControl>
