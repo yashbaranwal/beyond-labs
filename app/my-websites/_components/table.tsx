@@ -30,7 +30,13 @@ import { flagComponentsMap, languages } from "@/constants/languages";
 
 const ITEMS_PER_PAGE = 5;
 
-type GreyNicheIcon = "bitcoin" | "dice" | "dollar" | "medical" | "incognito" | "leaves";
+type GreyNicheIcon =
+  | "bitcoin"
+  | "dice"
+  | "dollar"
+  | "medical"
+  | "incognito"
+  | "leaves";
 
 const greyNiches: GreyNicheIcon[] = [
   "bitcoin",
@@ -48,7 +54,10 @@ export default function MyWebsitesTable() {
   const tableData = useFormStore((state) => state.tableData);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const totalPages = useMemo(() => Math.ceil(tableData.length / ITEMS_PER_PAGE), [tableData.length]);
+  const totalPages = useMemo(
+    () => Math.ceil(tableData.length / ITEMS_PER_PAGE),
+    [tableData.length]
+  );
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -56,9 +65,12 @@ export default function MyWebsitesTable() {
     return tableData.slice(startIndex, endIndex);
   }, [currentPage, tableData]);
 
-  const handleRowClick = useCallback((row: WebsiteFormData) => {
-    router.push(`/my-websites/${row.id}`);
-  }, [router]);
+  const handleRowClick = useCallback(
+    (row: WebsiteFormData) => {
+      router.push(`/my-websites/${row.id}`);
+    },
+    [router]
+  );
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -68,7 +80,8 @@ export default function MyWebsitesTable() {
     const country = countries.find((ele) => ele.value === val);
     if (!country) return null;
 
-    const FlagComponent = flagComponentsMap[country.flagCode as keyof typeof flagComponentsMap];
+    const FlagComponent =
+      flagComponentsMap[country.flagCode as keyof typeof flagComponentsMap];
     if (!FlagComponent) return null;
 
     return (
@@ -89,16 +102,19 @@ export default function MyWebsitesTable() {
     return category?.label || "N/A";
   }, []);
 
-  const getOtherCategories = useCallback((values: string[]) => {
-    if (!Array.isArray(values) || values.length === 0) {
-      return "N/A";
-    }
-    const modifiedValues = values.map((ele) => getCategoryLabel(ele));
-    return modifiedValues.join(", ");
-  }, [getCategoryLabel]);
+  const getOtherCategories = useCallback(
+    (values: string[]) => {
+      if (!Array.isArray(values) || values.length === 0) {
+        return "N/A";
+      }
+      const modifiedValues = values.map((ele) => getCategoryLabel(ele));
+      return modifiedValues.join(", ");
+    },
+    [getCategoryLabel]
+  );
 
-  console.log(tableData,"tableData")
-  
+  console.log(tableData, "tableData");
+
   return (
     <div>
       <Table>
@@ -115,39 +131,47 @@ export default function MyWebsitesTable() {
         <TableBody>
           {paginatedData.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+              <TableCell
+                colSpan={6}
+                className="text-center py-8 text-muted-foreground"
+              >
                 No websites added yet.
               </TableCell>
             </TableRow>
           ) : (
-            paginatedData.map((item) => (
+            paginatedData?.map((item) => (
               <TableRow
                 key={item.websiteUrl}
                 className="cursor-pointer"
                 onClick={() => handleRowClick(item)}
               >
                 <TableCell className="font-medium">{item.websiteUrl}</TableCell>
-                <TableCell>
-                  {getCountry(item.country)}
-                </TableCell>
+                <TableCell>{getCountry(item.country)}</TableCell>
                 <TableCell>{getLanguage(item.language)}</TableCell>
-                <TableCell>{getCategoryLabel(item.mainCategories[0])}</TableCell>
-                <TableCell>
-                  {item.mainCategories.length > 1
-                    ? getOtherCategories(item.mainCategories.slice(1))
-                    : "N/A"}
-                </TableCell>
+                {item.mainCategories && (
+                  <TableCell>
+                    {getCategoryLabel(item.mainCategories[0])}
+                  </TableCell>
+                )}
+                {item.mainCategories && (
+                  <TableCell>
+                    {item.mainCategories.length > 1
+                      ? getOtherCategories(item.mainCategories.slice(1))
+                      : "N/A"}
+                  </TableCell>
+                )}
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    {greyNiches.map((niche, index) => (
-                      <Image
-                        key={index}
-                        width={16}
-                        height={16}
-                        src={`/icons/${getGreyNicheIcon(niche)}.svg`}
-                        alt={`${niche} icon`}
-                      />
-                    ))}
+                    {item.greyNicheOfferSamePrice &&
+                      greyNiches.map((niche, index) => (
+                        <Image
+                          key={index}
+                          width={16}
+                          height={16}
+                          src={`/icons/${getGreyNicheIcon(niche)}.svg`}
+                          alt={`${niche} icon`}
+                        />
+                      ))}
                   </div>
                 </TableCell>
               </TableRow>
