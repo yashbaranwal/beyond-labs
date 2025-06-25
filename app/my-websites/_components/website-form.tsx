@@ -77,28 +77,64 @@ export const formSchema = z.object({
   greyNicheOfferSamePrice: z.string().optional(),
   greyNicheOffers: z.object({
     gambling: z.object({
-      guestPosting: z.string().optional(),
-      linkInsertion: z.string().optional(),
+      guestPosting: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
+      linkInsertion: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
     }),
     crypto: z.object({
-      guestPosting: z.string().optional(),
-      linkInsertion: z.string().optional(),
+      guestPosting: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
+      linkInsertion: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
     }),
     adult: z.object({
-      guestPosting: z.string().optional(),
-      linkInsertion: z.string().optional(),
+      guestPosting: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
+      linkInsertion: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
     }),
     casino: z.object({
-      guestPosting: z.string().optional(),
-      linkInsertion: z.string().optional(),
+      guestPosting: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
+      linkInsertion: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
     }),
     betting: z.object({
-      guestPosting: z.string().optional(),
-      linkInsertion: z.string().optional(),
+      guestPosting: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
+      linkInsertion: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
     }),
     forex: z.object({
-      guestPosting: z.string().optional(),
-      linkInsertion: z.string().optional(),
+      guestPosting: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
+      linkInsertion: z.coerce
+        .number()
+        .min(0, { message: "Value cannot be negative" })
+        .optional(),
     }),
   }),
   homepageLinkPrice: z.coerce
@@ -484,7 +520,7 @@ const WebsiteForm = () => {
                               <PriceInput
                                 {...field}
                                 onChange={(event) => {
-                                  field.onChange(event.target.value);
+                                  field.onChange(Number(event.target.value));
                                 }}
                               />
                             </FormControl>
@@ -502,7 +538,7 @@ const WebsiteForm = () => {
                               <PriceInput
                                 {...field}
                                 onChange={(event) => {
-                                  field.onChange(event.target.value);
+                                  field.onChange(Number(event.target.value));
                                 }}
                               />
                             </FormControl>
