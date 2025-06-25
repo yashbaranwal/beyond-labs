@@ -45,7 +45,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BulletSection from "../add-website/_components/bullet-section";
 import { websitFormTabs } from "@/constants/website-form-tabs";
-import { ta } from "zod/v4/locales";
 
 export const formSchema = z.object({
   acceptPreconditions: z.boolean(),
