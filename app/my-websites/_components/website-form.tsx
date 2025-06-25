@@ -20,6 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import {
   Form,
@@ -45,6 +57,8 @@ import { flagComponentsMap, languages } from "@/constants/languages";
 import BulletSection from "../add-website/_components/bullet-section";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Check, ChevronDownIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Schema for common price fields (guest posting and link insertion)
 const priceSchema = z.coerce
@@ -144,6 +158,10 @@ const nicheKeys = ["gambling", "crypto", "adult", "casino", "betting", "forex"];
 const WebsiteForm = () => {
   const router = useRouter();
   const { addFormData } = useFormStore();
+  const [openPrimaryLanguagePopover, setOpenPrimaryLanguagePopover] =
+    useState(false);
+  const [openMajorityTrafficPopover, setOpenMajorityTrafficPopover] =
+    useState(false);
   const [openItem, setOpenItem] = useState<string | undefined>("item-1");
   const [tab, setTab] = useState<string>("normal-offer");
 
@@ -287,34 +305,67 @@ const WebsiteForm = () => {
                     control={form.control}
                     name="language"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Website&apos;s Primary language</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
+                        <Popover
+                          open={openPrimaryLanguagePopover}
+                          onOpenChange={setOpenPrimaryLanguagePopover}
                         >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {languages.map((lang) => {
-                              const FlagComponent =
-                                flagComponentsMap[lang.flagCode];
-                              return (
-                                <SelectItem key={lang.value} value={lang.value}>
-                                  <div className="flex items-center gap-2">
-                                    {FlagComponent && (
-                                      <FlagComponent className="h-4 w-4" />
-                                    )}
-                                    <span>{lang.label}</span>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openPrimaryLanguagePopover}
+                                className="w-full justify-between"
+                              >
+                                {field.value
+                                  ? languages.find(
+                                      (lang) => lang.value === field.value
+                                    )?.label
+                                  : "Select language..."}
+                                <ChevronDownIcon className="size-5 text-[#667085] stroke-2" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                            <Command>
+                              <CommandInput placeholder="Search language..." />
+                              <CommandEmpty>No language found.</CommandEmpty>
+                              <CommandGroup>
+                                {languages.map((lang) => {
+                                  const FlagComponent =
+                                    flagComponentsMap[lang.flagCode];
+                                  return (
+                                    <CommandItem
+                                      value={lang.label}
+                                      key={lang.value}
+                                      onSelect={() => {
+                                        form.setValue("language", lang.value);
+                                        setOpenPrimaryLanguagePopover(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          lang.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        {FlagComponent && (
+                                          <FlagComponent className="h-4 w-4" />
+                                        )}
+                                        <span>{lang.label}</span>
+                                      </div>
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -323,36 +374,69 @@ const WebsiteForm = () => {
                     control={form.control}
                     name="country"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>
                           Your Majority of traffic comes from
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
+                        <Popover
+                          open={openMajorityTrafficPopover}
+                          onOpenChange={setOpenMajorityTrafficPopover}
                         >
-                          <FormControl>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {countries.map((ele) => {
-                              const FlagComponent =
-                                flagComponentsMap[ele.flagCode];
-                              return (
-                                <SelectItem key={ele.value} value={ele.value}>
-                                  <div className="flex items-center gap-2">
-                                    {FlagComponent && (
-                                      <FlagComponent className="h-4 w-4" />
-                                    )}
-                                    <span>{ele.label}</span>
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openMajorityTrafficPopover}
+                                className="w-full justify-between"
+                              >
+                                {field.value
+                                  ? countries.find(
+                                      (country) => country.value === field.value
+                                    )?.label
+                                  : "Select country..."}
+                                <ChevronDownIcon className="size-5 text-[#667085] stroke-2" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                            <Command>
+                              <CommandInput placeholder="Search country..." />
+                              <CommandEmpty>No country found.</CommandEmpty>
+                              <CommandGroup>
+                                {countries.map((country) => {
+                                  const FlagComponent =
+                                    flagComponentsMap[country.flagCode];
+                                  return (
+                                    <CommandItem
+                                      value={country.label}
+                                      key={country.value}
+                                      onSelect={() => {
+                                        form.setValue("country", country.value);
+                                        setOpenMajorityTrafficPopover(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          country.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        {FlagComponent && (
+                                          <FlagComponent className="h-4 w-4" />
+                                        )}
+                                        <span>{country.label}</span>
+                                      </div>
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
