@@ -44,6 +44,8 @@ import { flagComponentsMap, languages } from "@/constants/languages";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BulletSection from "../add-website/_components/bullet-section";
+import { websitFormTabs } from "@/constants/website-form-tabs";
+import { ta } from "zod/v4/locales";
 
 export const formSchema = z.object({
   acceptPreconditions: z.boolean(),
@@ -143,8 +145,9 @@ const nicheKeys = ["gambling", "crypto", "adult", "casino", "betting", "forex"];
 
 const WebsiteForm = () => {
   const router = useRouter();
-  const [openItem, setOpenItem] = useState<string | undefined>("item-1");
   const { addFormData } = useFormStore();
+  const [openItem, setOpenItem] = useState<string | undefined>("item-1");
+  const [tab, setTab] = useState<string>("normal-offer");
 
   const form = useForm<WebsiteFormInput>({
     resolver: zodResolver(formSchema),
@@ -448,8 +451,8 @@ const WebsiteForm = () => {
             <div className="space-y-6">
               <h3 className="heading-three">Create offer</h3>
               <div className="bg-white rounded-sm p-6 space-y-8 w-full xl:w-10/12">
-                <Tabs defaultValue="normal-offer">
-                  <TabsList>
+                <Tabs value={tab} onValueChange={setTab}>
+                  <TabsList className="hidden md:inline-flex">
                     <TabsTrigger value="normal-offer">Normal offer</TabsTrigger>
                     <TabsTrigger value="grey-niche-offer">
                       Grey Niche offer
@@ -458,6 +461,18 @@ const WebsiteForm = () => {
                       Homepage link
                     </TabsTrigger>
                   </TabsList>
+                  <Select onValueChange={setTab} defaultValue={tab}>
+                    <SelectTrigger className="w-full md:hidden">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {websitFormTabs.map((ele) => (
+                        <SelectItem key={ele.value} value={ele.value}>
+                          {ele.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <TabsContent value="normal-offer">
                     <div className="pt-10 flex flex-col xl:flex-row xl:items-center gap-8">
                       <FormField
