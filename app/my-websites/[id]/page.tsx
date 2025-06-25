@@ -1,19 +1,13 @@
-import { FC } from "react"
+import WebsiteForm from "../_components/website-form"
 
 interface PageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
-const Page: FC<PageProps> = ({ params }) => {
-  const { id } = params
+export default async function Page({ params } : PageProps){
+  const { id } = await params
 
   return (
-    <div>
-      <p>test</p>
-    </div>
+    <WebsiteForm />
   )
 }
-
-export default Page

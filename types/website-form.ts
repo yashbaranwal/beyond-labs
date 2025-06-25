@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { formSchema } from "@/app/my-websites/add-website/page"
+import { formSchema } from "@/app/my-websites/_components/website-form"
 
 export type WebsiteFormInput = z.infer<typeof formSchema>
 
