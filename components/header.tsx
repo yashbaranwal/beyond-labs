@@ -7,20 +7,18 @@ import { usePathname } from "next/navigation";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
 
 const navLinks = [
-  { id: 1, name: "Marketplace", href: "/marketplace" },
+  { id: 1, name: "Marketplace", href: "#" },
   { id: 2, name: "My websites", href: "/my-websites" },
-  { id: 3, name: "My Orders", href: "/my-orders" },
-  { id: 4, name: "My projects", href: "/my-projects" },
-  { id: 5, name: "Received orders", href: "/recieved-orders" }
+  { id: 3, name: "My Orders", href: "#" },
+  { id: 4, name: "My projects", href: "#" },
+  { id: 5, name: "Received orders", href: "#" },
 ];
 
-interface NavLinkProps{
+interface NavLinkProps {
   href: string;
   name: string;
 }
@@ -59,15 +57,11 @@ const MobileNav = () => (
       <MenuIcon className="lg:hidden" />
     </SheetTrigger>
     <SheetContent>
-      <SheetHeader>
-        <SheetDescription>
-          <nav className="flex flex-col mt-8">
-            {navLinks.map((link) => (
-              <NavLink key={link.id} href={link.href} name={link.name} />
-            ))}
-          </nav>
-        </SheetDescription>
-      </SheetHeader>
+      <nav className="flex flex-col p-8">
+        {navLinks.map((link) => (
+          <NavLink key={link.id} href={link.href} name={link.name} />
+        ))}
+      </nav>
     </SheetContent>
   </Sheet>
 );
