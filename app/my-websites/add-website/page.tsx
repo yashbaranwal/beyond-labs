@@ -29,7 +29,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Dollar from "@/components/dollar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,7 @@ import { flagComponentsMap, languages } from "@/constants/languages";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WebsiteFormInput } from "@/types/website-form";
+import { PriceInput } from "@/components/ui/price-input";
 
 export const formSchema = z.object({
   acceptPreconditions: z.boolean(),
@@ -72,6 +72,34 @@ export const formSchema = z.object({
     .number()
     .min(0, { message: "Value cannot be negative" })
     .optional(),
+  greyNiche: z.enum(["same-price"]).optional(),
+  greyNicheOfferSamePrice: z.string().optional(),
+  greyNicheOffers: z.object({
+    gambling: z.object({
+      guestPosting: z.string().optional(),
+      linkInsertion: z.string().optional(),
+    }),
+    crypto: z.object({
+      guestPosting: z.string().optional(),
+      linkInsertion: z.string().optional(),
+    }),
+    adult: z.object({
+      guestPosting: z.string().optional(),
+      linkInsertion: z.string().optional(),
+    }),
+    casino: z.object({
+      guestPosting: z.string().optional(),
+      linkInsertion: z.string().optional(),
+    }),
+    betting: z.object({
+      guestPosting: z.string().optional(),
+      linkInsertion: z.string().optional(),
+    }),
+    forex: z.object({
+      guestPosting: z.string().optional(),
+      linkInsertion: z.string().optional(),
+    }),
+  }),
   homepageLinkPrice: z.coerce
     .number()
     .min(0, { message: "Value cannot be negative" })
@@ -111,6 +139,8 @@ export const formSchema = z.object({
   articleDescription: z.string().optional(),
 });
 
+const nicheKeys = ["gambling", "crypto", "adult", "casino", "betting", "forex"];
+
 export default function AddWebsite() {
   const router = useRouter();
   const [openItem, setOpenItem] = useState<string | undefined>("item-1");
@@ -127,6 +157,16 @@ export default function AddWebsite() {
       isOwner: false,
       normalOfferGuestPosting: 54,
       normalOfferLinkInsertion: 54,
+      greyNiche: undefined,
+      greyNicheOfferSamePrice: "",
+      greyNicheOffers: {
+        gambling: { guestPosting: "", linkInsertion: "" },
+        crypto: { guestPosting: "", linkInsertion: "" },
+        adult: { guestPosting: "", linkInsertion: "" },
+        casino: { guestPosting: "", linkInsertion: "" },
+        betting: { guestPosting: "", linkInsertion: "" },
+        forex: { guestPosting: "", linkInsertion: "" },
+      },
       homepageLinkPrice: 54,
       isArticleIncluded: "yes",
       numberOfWords: "not-limited",
@@ -157,6 +197,11 @@ export default function AddWebsite() {
     control: form.control,
     name: "acceptPreconditions",
   });
+
+  const watchGreyNicheSamePrice = useWatch({
+    control: form.control,
+    name: "greyNiche",
+  }) === "same-price";
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     addFormData({ ...data, id: uuidv4() });
@@ -402,7 +447,7 @@ export default function AddWebsite() {
             <div className="space-y-6">
               <h3 className="heading-three">Create offer</h3>
               <div className="bg-white rounded-sm p-6 space-y-8 w-10/12">
-                <Tabs defaultValue="normal-offer">
+                <Tabs defaultValue="grey-niche-offer">
                   <TabsList>
                     <TabsTrigger value="normal-offer">Normal offer</TabsTrigger>
                     <TabsTrigger value="grey-niche-offer">
@@ -421,16 +466,12 @@ export default function AddWebsite() {
                           <FormItem className="w-3/12">
                             <FormLabel>Guest posting</FormLabel>
                             <FormControl>
-                              <div className="flex items-center">
-                                <Dollar />
-                                <Input
-                                  {...field}
-                                  onChange={(event) => {
-                                    field.onChange(event.target.value);
-                                  }}
-                                  className="flex-1 rounded-l-none focus-visible:z-10"
-                                />
-                              </div>
+                              <PriceInput
+                                {...field}
+                                onChange={(event) => {
+                                  field.onChange(event.target.value);
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -443,21 +484,121 @@ export default function AddWebsite() {
                           <FormItem className="w-3/12">
                             <FormLabel>Link insertion</FormLabel>
                             <FormControl>
-                              <div className="flex items-center">
-                                <Dollar />
-                                <Input
-                                  {...field}
-                                  onChange={(event) => {
-                                    field.onChange(event.target.value);
-                                  }}
-                                  className="flex-1 rounded-l-none focus-visible:z-10"
-                                />
-                              </div>
+                              <PriceInput
+                                {...field}
+                                onChange={(event) => {
+                                  field.onChange(event.target.value);
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="grey-niche-offer">
+                    <div className="pt-10 space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="greyNiche"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="flex flex-col"
+                              >
+                                <FormItem className="flex items-center gap-3">
+                                  <FormControl>
+                                    <RadioGroupItem value="same-price" />
+                                  </FormControl>
+                                  <FormLabel className="radio-form-label">
+                                    I offer same price for all grey niches
+                                  </FormLabel>
+                                </FormItem>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {watchGreyNicheSamePrice && (
+                        <FormField
+                          control={form.control}
+                          name="greyNicheOfferSamePrice"
+                          render={({ field }) => (
+                            <FormItem className="w-3/12">
+                              <FormLabel>Enter Price</FormLabel>
+                              <FormControl>
+                                <PriceInput
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value)
+                                  }
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                      {/* Individual niche inputs */}
+                      <div className="grid grid-cols-3 gap-6 mt-8">
+                        {nicheKeys.map((key) => (
+                          <div key={key} className="space-y-4">
+                            <h6 className="font-semibold text-foreground/60 capitalize">
+                              {key}
+                            </h6>
+                            <div className="space-y-4">
+                              <FormField
+                                control={form.control}
+                                name={`greyNicheOffers.${key}.guestPosting`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Price for Guest Posting
+                                    </FormLabel>
+                                    <FormControl>
+                                      <PriceInput
+                                        {...field}
+                                        disabled={watchGreyNicheSamePrice}
+                                        onChange={(e) =>
+                                          field.onChange(e.target.value)
+                                        }
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name={`greyNicheOffers.${key}.linkInsertion`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Price for Link Insertion
+                                    </FormLabel>
+                                    <FormControl>
+                                      <PriceInput
+                                        {...field}
+                                        disabled={watchGreyNicheSamePrice}
+                                        onChange={(e) =>
+                                          field.onChange(e.target.value)
+                                        }
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </TabsContent>
                   <TabsContent value="homepage-link">
@@ -469,16 +610,12 @@ export default function AddWebsite() {
                           <FormItem className="w-3/12">
                             <FormLabel>Price</FormLabel>
                             <FormControl>
-                              <div className="flex items-center">
-                                <Dollar />
-                                <Input
-                                  {...field}
-                                  onChange={(event) => {
-                                    field.onChange(event.target.value);
-                                  }}
-                                  className="flex-1 rounded-l-none focus-visible:z-10"
-                                />
-                              </div>
+                              <PriceInput
+                                {...field}
+                                onChange={(event) => {
+                                  field.onChange(event.target.value);
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
