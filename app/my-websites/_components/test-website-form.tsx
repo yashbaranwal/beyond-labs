@@ -1,11 +1,13 @@
 "use client";
 
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, ChevronDownIcon } from "lucide-react";
 
 import {
   Accordion,
@@ -20,6 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import {
   Form,
@@ -41,11 +55,10 @@ import { WebsiteFormInput } from "@/types/website-form";
 import { PriceInput } from "@/components/ui/price-input";
 import { useFormStore } from "@/stores/add-website-form-store";
 import { websitFormTabs } from "@/constants/website-form-tabs";
-import { languages } from "@/constants/languages";
+import { flagComponentsMap, languages } from "@/constants/languages";
 import BulletSection from "../add-website/_components/bullet-section";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Combobox } from "./combobox";
 
 // Schema for common price fields (guest posting and link insertion)
 const priceSchema = z.coerce
@@ -61,11 +74,6 @@ const minMaxNumberSchema = z.coerce
   .min(1, { message: "Minimum must be greater than 0" })
   .optional()
   .or(z.literal(""));
-
-const greyNicheOffersSchema = z.object({
-  guestPosting: priceSchema,
-  linkInsertion: priceSchema,
-});
 
 export const formSchema = z.object({
   // Basic Information
@@ -94,14 +102,32 @@ export const formSchema = z.object({
 
   // Grey Niche Offers
   greyNiche: z.enum(["same-price"]).optional(),
-  greyNicheOfferSamePrice: priceSchema,
+  greyNicheOfferSamePrice: z.string().optional(),
   greyNicheOffers: z.object({
-    gambling: greyNicheOffersSchema,
-    crypto: greyNicheOffersSchema,
-    adult: greyNicheOffersSchema,
-    casino: greyNicheOffersSchema,
-    betting: greyNicheOffersSchema,
-    forex: greyNicheOffersSchema,
+    gambling: z.object({
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
+    }),
+    crypto: z.object({
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
+    }),
+    adult: z.object({
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
+    }),
+    casino: z.object({
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
+    }),
+    betting: z.object({
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
+    }),
+    forex: z.object({
+      guestPosting: priceSchema,
+      linkInsertion: priceSchema,
+    }),
   }),
 
   // Homepage Link Details
@@ -129,7 +155,7 @@ export const formSchema = z.object({
 
 const nicheKeys = ["gambling", "crypto", "adult", "casino", "betting", "forex"];
 
-const WebsiteForm = ({ id }: { id?: string }) => {
+const TestWebsiteForm = ({ id }: { id?: string }) => {
   const router = useRouter();
   const { tableData, addFormData, updateFormData } = useFormStore();
   const [tab, setTab] = useState<string>("normal-offer");
@@ -137,9 +163,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
     useState(false);
   const [openMajorityTrafficPopover, setOpenMajorityTrafficPopover] =
     useState(false);
-  const [openAccordionItem, setOpenAccordionItem] = useState<
-    string | undefined
-  >("item-1");
+  const [openItem, setOpenItem] = useState<string | undefined>("item-1");
 
   const form = useForm<WebsiteFormInput>({
     resolver: zodResolver(formSchema),
@@ -154,7 +178,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
       normalOfferGuestPosting: 54,
       normalOfferLinkInsertion: 54,
       greyNiche: undefined,
-      greyNicheOfferSamePrice: undefined,
+      greyNicheOfferSamePrice: "",
       greyNicheOffers: {
         gambling: { guestPosting: undefined, linkInsertion: undefined },
         crypto: { guestPosting: undefined, linkInsertion: undefined },
@@ -201,29 +225,24 @@ const WebsiteForm = ({ id }: { id?: string }) => {
       name: "greyNiche",
     }) === "same-price";
 
-  const onSubmit = useCallback(
-    (data: z.infer<typeof formSchema>) => {
-      if (id) {
-        updateFormData({ ...data, id: id });
-      } else {
-        addFormData({ ...data, id: uuidv4() });
-      }
-      router.push("/my-websites");
-    },
-    [id, updateFormData, addFormData, router]
-  );
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    if (id) {
+      updateFormData({ ...data, id: id });
+    } else {
+      addFormData({ ...data, id: uuidv4() });
+    }
+    router.push("/my-websites");
+  };
 
-  const handleAccept = useCallback(() => {
+  const handleAccept = () => {
     form.setValue("acceptPreconditions", true);
-    setOpenAccordionItem(undefined);
-  }, [form]);
+    setOpenItem(undefined);
+  };
 
   useEffect(() => {
-    if (id) {
-      const websiteDetails = tableData.find((ele) => ele.id === id);
-      if (websiteDetails) {
-        form.reset(websiteDetails);
-      }
+    const websiteDetails = tableData.find((ele) => ele.id === id);
+    if (websiteDetails) {
+      form.reset(websiteDetails);
     }
   }, [id, tableData, form]);
 
@@ -238,8 +257,8 @@ const WebsiteForm = ({ id }: { id?: string }) => {
           <Accordion
             type="single"
             collapsible
-            value={openAccordionItem}
-            onValueChange={setOpenAccordionItem}
+            value={openItem}
+            onValueChange={setOpenItem}
             className="px-6 py-0 bg-secondary border border-gray rounded-md"
           >
             <AccordionItem value="item-1">
@@ -277,7 +296,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
             </AccordionItem>
           </Accordion>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-14">
-            <section className="space-y-6">
+            <div className="space-y-6">
               <h3 className="heading-three">Website Detail</h3>
               <div className="bg-white rounded-sm p-6 space-y-8">
                 <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
@@ -300,15 +319,65 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Website&apos;s Primary language</FormLabel>
-                        <Combobox
-                          options={languages}
-                          label="Language"
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Select language..."
-                          popoverOpen={openPrimaryLanguagePopover}
-                          setPopoverOpen={setOpenPrimaryLanguagePopover}
-                        />
+                        <Popover
+                          open={openPrimaryLanguagePopover}
+                          onOpenChange={setOpenPrimaryLanguagePopover}
+                        >
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openPrimaryLanguagePopover}
+                                className="w-full justify-between"
+                              >
+                                {field.value
+                                  ? languages.find(
+                                      (lang) => lang.value === field.value
+                                    )?.label
+                                  : "Select language..."}
+                                <ChevronDownIcon className="size-5 text-[#667085] stroke-2" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                            <Command>
+                              <CommandInput placeholder="Search language..." />
+                              <CommandEmpty>No language found.</CommandEmpty>
+                              <CommandGroup>
+                                {languages.map((lang) => {
+                                  const FlagComponent =
+                                    flagComponentsMap[lang.flagCode];
+                                  return (
+                                    <CommandItem
+                                      value={lang.label}
+                                      key={lang.value}
+                                      onSelect={() => {
+                                        form.setValue("language", lang.value);
+                                        setOpenPrimaryLanguagePopover(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          lang.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        {FlagComponent && (
+                                          <FlagComponent className="h-4 w-4" />
+                                        )}
+                                        <span>{lang.label}</span>
+                                      </div>
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -321,15 +390,65 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                         <FormLabel>
                           Your Majority of traffic comes from
                         </FormLabel>
-                        <Combobox
-                          options={countries}
-                          label="Country"
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder="Select country..."
-                          popoverOpen={openMajorityTrafficPopover}
-                          setPopoverOpen={setOpenMajorityTrafficPopover}
-                        />
+                        <Popover
+                          open={openMajorityTrafficPopover}
+                          onOpenChange={setOpenMajorityTrafficPopover}
+                        >
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={openMajorityTrafficPopover}
+                                className="w-full justify-between"
+                              >
+                                {field.value
+                                  ? countries.find(
+                                      (country) => country.value === field.value
+                                    )?.label
+                                  : "Select country..."}
+                                <ChevronDownIcon className="size-5 text-[#667085] stroke-2" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                            <Command>
+                              <CommandInput placeholder="Search country..." />
+                              <CommandEmpty>No country found.</CommandEmpty>
+                              <CommandGroup>
+                                {countries.map((country) => {
+                                  const FlagComponent =
+                                    flagComponentsMap[country.flagCode];
+                                  return (
+                                    <CommandItem
+                                      value={country.label}
+                                      key={country.value}
+                                      onSelect={() => {
+                                        form.setValue("country", country.value);
+                                        setOpenMajorityTrafficPopover(false);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          country.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex items-center gap-2">
+                                        {FlagComponent && (
+                                          <FlagComponent className="h-4 w-4" />
+                                        )}
+                                        <span>{country.label}</span>
+                                      </div>
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -421,9 +540,9 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                   )}
                 />
               </div>
-            </section>
+            </div>
 
-            <section className="space-y-6">
+            <div className="space-y-6">
               <h3 className="heading-three">Create offer</h3>
               <div className="bg-white rounded-sm p-6 space-y-8 w-full xl:w-10/12">
                 <Tabs value={tab} onValueChange={setTab}>
@@ -633,9 +752,9 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                   </TabsContent>
                 </Tabs>
               </div>
-            </section>
+            </div>
 
-            <section className="space-y-6">
+            <div className="space-y-6">
               <h3 className="heading-three">Article specification</h3>
               <div className="bg-white rounded-sm p-6 grid grid-cols-1 xl:grid-cols-2 gap-4 xl:w-10/12">
                 <div className="flex-1 space-y-12">
@@ -1030,9 +1149,9 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                   />
                 </div>
               </div>
-            </section>
+            </div>
             <Button className="w-64" type="submit">
-              {id ? "Update" : "Save"}
+              Save
             </Button>
           </form>
         </Form>
@@ -1041,4 +1160,4 @@ const WebsiteForm = ({ id }: { id?: string }) => {
   );
 };
 
-export default WebsiteForm;
+export default TestWebsiteForm;
