@@ -1,11 +1,13 @@
 "use client";
 
 import { z } from "zod";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Check, ChevronDownIcon } from "lucide-react";
 
 import {
   Accordion,
@@ -57,8 +59,6 @@ import { flagComponentsMap, languages } from "@/constants/languages";
 import BulletSection from "../add-website/_components/bullet-section";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, ChevronDownIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 // Schema for common price fields (guest posting and link insertion)
 const priceSchema = z.coerce
@@ -155,15 +155,15 @@ export const formSchema = z.object({
 
 const nicheKeys = ["gambling", "crypto", "adult", "casino", "betting", "forex"];
 
-const WebsiteForm = () => {
+const WebsiteForm = ({ id }: { id?: string }) => {
   const router = useRouter();
-  const { addFormData } = useFormStore();
+  const { tableData, addFormData } = useFormStore();
+  const [tab, setTab] = useState<string>("normal-offer");
   const [openPrimaryLanguagePopover, setOpenPrimaryLanguagePopover] =
     useState(false);
   const [openMajorityTrafficPopover, setOpenMajorityTrafficPopover] =
     useState(false);
   const [openItem, setOpenItem] = useState<string | undefined>("item-1");
-  const [tab, setTab] = useState<string>("normal-offer");
 
   const form = useForm<WebsiteFormInput>({
     resolver: zodResolver(formSchema),
@@ -174,6 +174,7 @@ const WebsiteForm = () => {
       country: "en-US",
       mainCategories: ["art", "energy-solar-energy", "gaming"],
       isOwner: false,
+      description: "",
       normalOfferGuestPosting: 54,
       normalOfferLinkInsertion: 54,
       greyNiche: undefined,
@@ -187,6 +188,7 @@ const WebsiteForm = () => {
         forex: { guestPosting: undefined, linkInsertion: undefined },
       },
       homepageLinkPrice: 54,
+      homepageLinkDescription: "",
       isArticleIncluded: "yes",
       numberOfWords: "not-limited",
       numberOfWordsMinWords: "",
@@ -232,7 +234,13 @@ const WebsiteForm = () => {
     form.setValue("acceptPreconditions", true);
     setOpenItem(undefined);
   };
-  // console.log(form.formState.errors,"F")
+
+  useEffect(() => {
+    const websiteDetails = tableData.find((ele) => ele.id === id);
+    if (websiteDetails) {
+      form.reset(websiteDetails);
+    }
+  }, [id, tableData, form]);
 
   return (
     <main className="bg-background p-6 pb-32">
@@ -605,7 +613,7 @@ const WebsiteForm = () => {
                             <FormControl>
                               <RadioGroup
                                 onValueChange={field.onChange}
-                                defaultValue={field.value}
+                                value={field.value}
                                 className="flex flex-col"
                               >
                                 <FormItem className="flex items-center gap-3">
@@ -757,7 +765,7 @@ const WebsiteForm = () => {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex flex-col"
                           >
                             <FormItem className="flex items-center gap-3">
@@ -795,7 +803,7 @@ const WebsiteForm = () => {
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                               className="flex flex-col"
                             >
                               <FormItem className="flex items-center gap-3">
@@ -870,7 +878,7 @@ const WebsiteForm = () => {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex flex-col"
                           >
                             <FormItem className="flex items-center gap-3">
@@ -906,7 +914,7 @@ const WebsiteForm = () => {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex flex-col"
                           >
                             <FormItem className="flex items-center gap-3">
@@ -961,7 +969,7 @@ const WebsiteForm = () => {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex flex-col"
                           >
                             <FormItem className="flex items-center gap-3">
@@ -1016,7 +1024,7 @@ const WebsiteForm = () => {
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
                               className="flex flex-col"
                             >
                               <FormItem className="flex items-center gap-3">
@@ -1089,7 +1097,7 @@ const WebsiteForm = () => {
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
-                            defaultValue={field.value}
+                            value={field.value}
                             className="flex flex-col"
                           >
                             <FormItem className="flex items-center gap-3">

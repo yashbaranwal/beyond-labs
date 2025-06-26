@@ -8,6 +8,6 @@ export default async function Page({ params } : PageProps){
   const { id } = await params
 
   return (
-    <WebsiteForm />
+    <WebsiteForm id={id} />
   )
 }

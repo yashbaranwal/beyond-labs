@@ -26,7 +26,6 @@ import { WebsiteFormData } from "@/types/website-form";
 import { mainCategories } from "@/constants/categories";
 import { useFormStore } from "@/stores/add-website-form-store";
 import { flagComponentsMap, languages } from "@/constants/languages";
-// import { tableData } from "@/constants/sample-table-data";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -113,8 +112,6 @@ export default function MyWebsitesTable() {
     [getCategoryLabel]
   );
 
-  console.log(tableData, "tableData");
-
   return (
     <div>
       <Table>
@@ -141,7 +138,7 @@ export default function MyWebsitesTable() {
           ) : (
             paginatedData?.map((item) => (
               <TableRow
-                key={item.websiteUrl}
+                key={item.id}
                 className="cursor-pointer"
                 onClick={() => handleRowClick(item)}
               >
@@ -162,7 +159,7 @@ export default function MyWebsitesTable() {
                 )}
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    {item.greyNicheOfferSamePrice &&
+                    {item.greyNiche!=="same-price" &&
                       greyNiches.map((niche, index) => (
                         <Image
                           key={index}
