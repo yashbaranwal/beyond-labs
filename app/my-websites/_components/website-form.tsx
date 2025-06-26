@@ -157,7 +157,7 @@ const nicheKeys = ["gambling", "crypto", "adult", "casino", "betting", "forex"];
 
 const WebsiteForm = ({ id }: { id?: string }) => {
   const router = useRouter();
-  const { tableData, addFormData } = useFormStore();
+  const { tableData, addFormData, updateFormData } = useFormStore();
   const [tab, setTab] = useState<string>("normal-offer");
   const [openPrimaryLanguagePopover, setOpenPrimaryLanguagePopover] =
     useState(false);
@@ -226,7 +226,11 @@ const WebsiteForm = ({ id }: { id?: string }) => {
     }) === "same-price";
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    addFormData({ ...data, id: uuidv4() });
+    if (id) {
+      updateFormData({ ...data, id: id });
+    } else {
+      addFormData({ ...data, id: uuidv4() });
+    }
     router.push("/my-websites");
   };
 
