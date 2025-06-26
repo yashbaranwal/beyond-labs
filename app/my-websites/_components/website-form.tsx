@@ -180,17 +180,17 @@ const WebsiteForm = ({ id }: { id?: string }) => {
     },
   });
 
-  const selectedValue = useWatch({
+  const watchNumberOfWords = useWatch({
     control: form.control,
     name: "numberOfWords",
   });
 
-  const numberOfLinksValue = useWatch({
+  const watchNumberOfLinks = useWatch({
     control: form.control,
     name: "numberOfLinks",
   });
 
-  const isAccepted = useWatch({
+  const watchAcceptPreconditions = useWatch({
     control: form.control,
     name: "acceptPreconditions",
   });
@@ -247,7 +247,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                 <p className="flex-1">
                   Hey, Accept Preconditions before you start the listing!
                 </p>
-                {isAccepted ? (
+                {watchAcceptPreconditions ? (
                   <AcceptBadge />
                 ) : (
                   <Badge variant="pending">
@@ -266,7 +266,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                   them carefully before moving ahead. Once accepted, you&apos;ll
                   be able to start listing right away.
                 </p>
-                {isAccepted ? (
+                {watchAcceptPreconditions ? (
                   <AcceptBadge />
                 ) : (
                   <Button className="w-48" onClick={handleAccept}>
@@ -715,7 +715,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                       )}
                     />
 
-                    {selectedValue === "no" && (
+                    {watchNumberOfWords === "no" && (
                       <div className="flex gap-12 px-6">
                         <FormField
                           control={form.control}
@@ -934,7 +934,7 @@ const WebsiteForm = ({ id }: { id?: string }) => {
                         </FormItem>
                       )}
                     />
-                    {numberOfLinksValue === "no" && (
+                    {watchNumberOfLinks === "no" && (
                       <div className="flex gap-12 px-6">
                         <FormField
                           control={form.control}
