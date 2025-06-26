@@ -20,6 +20,7 @@ import { flagComponentsMap } from "@/constants/languages";
 interface Option {
   value: string;
   label: string;
+  flagCode: string;
 }
 
 interface ComboboxProps {
